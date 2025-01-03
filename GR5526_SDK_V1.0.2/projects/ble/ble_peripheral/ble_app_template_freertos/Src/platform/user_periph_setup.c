@@ -43,7 +43,7 @@
 #include "user_periph_setup.h"
 #include "gr_includes.h"
 #include "dfu_port.h"
-#include "board_SK.h"
+#include "board_bc.h"
 #include "hal_flash.h"
 #include "app_rtc.h"
 #include "flash_scatter_config.h"
@@ -141,5 +141,5 @@ void app_periph_init(void)
     log_store_init();
 #endif
 
-    pwr_mgmt_mode_set(PMR_MGMT_SLEEP_MODE);
+    pwr_mgmt_mode_set(PMR_MGMT_ACTIVE_MODE);
 }

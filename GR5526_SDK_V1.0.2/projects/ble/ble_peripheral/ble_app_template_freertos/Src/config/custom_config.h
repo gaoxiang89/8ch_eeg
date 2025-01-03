@@ -198,7 +198,7 @@
 // <0=> Default: Disable internal osc as low power clock
 // <1=> Enable internal osc as low power clock and force CFG_LF_ACCURACY_PPM to 500ppm
 #ifndef CFG_LPCLK_INTERNAL_EN
-#define CFG_LPCLK_INTERNAL_EN   0
+#define CFG_LPCLK_INTERNAL_EN   1
 #endif
 
 // <o> Delay time for Boot startup

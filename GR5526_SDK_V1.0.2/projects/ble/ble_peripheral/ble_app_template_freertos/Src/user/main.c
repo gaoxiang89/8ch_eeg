@@ -54,6 +54,8 @@
 #include "pmu_calibration.h"
 #include "app_rtc.h"
 #include "dfu_port.h"
+#include "ads1299.h"
+#include "qmi8658.h"
 
 /*
  * DEFINES
@@ -76,7 +78,7 @@
 STACK_HEAP_INIT(heaps_table);
 calendar_time_t g_calendar_time;
 char *const     weeday_str[7] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
-
+float acc[3], gyro[3], mag[3];
 /*
  * LOCAL FUNCTION DEFINITIONS
  ****************************************************************************************
@@ -86,11 +88,14 @@ static void print_test_task(void *p_arg)
     while (1)
     {
         app_rtc_get_time(&g_calendar_time);
-        APP_LOG_INFO("TickCount: %d, Time: %02d/%02d %02d:%02d:%02d.\r\n",
-                      xTaskGetTickCount(),
-                      g_calendar_time.mon, g_calendar_time.date,
-                      g_calendar_time.hour, g_calendar_time.min, g_calendar_time.sec);
+//        APP_LOG_INFO("TickCount: %d, Time: %02d/%02d %02d:%02d:%02d.\r\n",
+//                      xTaskGetTickCount(),
+//                      g_calendar_time.mon, g_calendar_time.date,
+//                      g_calendar_time.hour, g_calendar_time.min, g_calendar_time.sec);
         app_log_flush();
+        qmi8658_read_xyz(acc, gyro);
+        qmc6309_read_mag_xyz(mag);
+
         vTaskDelay(1000);
     }
 }
@@ -151,6 +156,12 @@ int main(void)
 {
     app_periph_init();                                              /*<init user periph .*/
     ble_stack_init(ble_evt_handler, &heaps_table);                  /*< init ble stack*/
+
+    vTaskDelay(1000);
+    ads1299_init();
+    qmc6309_init();
+    qmi8658_init();
+
 
     xTaskCreate(vStartTasks, "create_task", 512, NULL, 0, NULL);    /*< create some demo tasks via freertos */
     vTaskStartScheduler();                                          /*< freertos run all tasks*/
