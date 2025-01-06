@@ -41,7 +41,7 @@ extern "C"
 
     int ads1299_read_samples_data(uint8_t *data, uint8_t len);
 
-void ads1299_hw_reset_pin_set(int value);
+    void ads1299_hw_reset_pin_set(int value);
 
     void ads1299_delay_ms(uint32_t ms);
 

@@ -46,7 +46,7 @@ static int ads1299_write_cmd(uint8_t command)
 static int ads1299_write_reg(uint8_t reg, uint8_t rval)
 {
 	int ret = 0;
-	uint8_t write_buf[3] = {CMD_WREG  | reg, 0x0};
+	uint8_t write_buf[3] = {CMD_WREG | reg, 0x0, rval};
 	uint8_t read_buf[3] = {0, 0, 0};
 
 	ret = ads1299_hw_spi_transmit_receive(write_buf, read_buf, 3);
@@ -72,23 +72,22 @@ static int ads1299_read_reg(uint8_t reg, uint8_t *rval)
 		return ret;
 	}
 
-	APP_LOG_DEBUG("reg %02x, value %02x\r\n", reg, read_buf[2]);
 	*rval = read_buf[2];
 
 	return 0;
 }
 
-
-
 static void ads1299_device_reset(void)
 {
+	ads1299_delay_ms(200);
 #ifdef ADS1299_RESET_PIN_ENABLE
 	ads1299_hw_reset_pin_set(0);
-	ads1299_delay_ms(200);
+	ads1299_delay_ms(20);
 	ads1299_hw_reset_pin_set(1);
 	ads1299_delay_ms(500);
 #else
 	ads1299_write_cmd(CMD_RESET);
+	ads1299_delay_ms(500);
 #endif
 }
 
@@ -168,13 +167,29 @@ int ads1299_init(void)
 
 	ads1299_write_cmd(CMD_SDATAC);
 	ads1299_all_reg_read();
-
-	ads1299_write_cmd(CMD_SDATAC);
-
-	ads1299_write_cmd(CMD_RDATAC);
+	ads1299_delay_ms(10);
+	default_reg_set();
+	ads1299_all_reg_read();
+	ads1299_write_cmd(CMD_START);
 	ads1299_delay_ms(1);
 	ads1299_write_cmd(CMD_START);
 	ads1299_delay_ms(1);
-
+	ads1299_write_cmd(CMD_RDATAC);
 	return 0;
+}
+
+/* 用于读取数据 */
+static uint8_t spi_tx_dumy[ADS1299_READ_SAMPLE_BYTES];
+
+int ads1299_read_samples_data(uint8_t *data, uint8_t len)
+{
+	int ret = 0;
+
+	ret = ads1299_hw_spi_transmit_receive(spi_tx_dumy, data, len);
+	if (ret != 0)
+	{
+		APP_LOG_INFO("afe read reg failed, %d\r\n", ret);
+	}
+
+	return ret;
 }

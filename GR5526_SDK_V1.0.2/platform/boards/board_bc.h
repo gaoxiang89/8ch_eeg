@@ -102,6 +102,9 @@
 #define AFE_DRDY_PIN   APP_IO_PIN_7
 #define AFE_DRDY_TYPE  APP_IO_TYPE_GPIOB
 
+#define AFE_DEBUG_PIN   APP_IO_PIN_0
+#define AFE_DEBUG_TYPE  APP_IO_TYPE_MSIO
+
 /*******I2S IO CONFIG***************************/
 #define APP_I2S_MASTER_WS_PIN               APP_IO_PIN_6
 #define APP_I2S_MASTER_SDO_PIN              APP_IO_PIN_7
