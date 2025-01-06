@@ -12,7 +12,7 @@ void eeg_drdy_cb(void)
 {
     BaseType_t ret = pdTRUE;
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    APP_LOG_ERROR("eeg drdy\r\n");
+
     if (eeg_drdy_sem)
     {
         ret = xSemaphoreGiveFromISR(eeg_drdy_sem, &xHigherPriorityTaskWoken);
@@ -56,16 +56,17 @@ void eeg_reader_task(void *arg)
     ads1299_drdy_cb_register(eeg_drdy_cb);
     ads1299_read_samples_data(rd_eeg_buf, ADS1299_READ_SAMPLE_BYTES);
     eeg_read_debug_pin_init();
-		APP_LOG_INFO("eeg reader init\r\n");
+    APP_LOG_INFO("eeg reader init\r\n");
     while (1)
     {
         xSemaphoreTake(eeg_drdy_sem, pdMS_TO_TICKS(5000));
         eeg_read_debug_pin_set(APP_IO_PIN_SET);
         ads1299_read_samples_data(rd_eeg_buf, ADS1299_READ_SAMPLE_BYTES);
         eeg_read_debug_pin_set(APP_IO_PIN_RESET);
-        // if (count++ >= 250)
+        if (count++ >= 250)
         {
             APP_LOG_INFO("eeg reader, count: %d\r\n", count);
+            count = 0;
         }
     }
 

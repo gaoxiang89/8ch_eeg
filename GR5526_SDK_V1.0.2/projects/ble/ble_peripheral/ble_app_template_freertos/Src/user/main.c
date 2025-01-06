@@ -55,7 +55,7 @@
 #include "app_rtc.h"
 #include "dfu_port.h"
 #include "eeg_reader.h"
-#include "qmi8658.h"
+#include "imu_reader.h"
 
 /*
  * DEFINES
@@ -158,6 +158,7 @@ int main(void)
     vTaskDelay(1000);
     
     eeg_reader_init();
+   imu_reader_init();
 
 
     xTaskCreate(vStartTasks, "create_task", 512, NULL, 0, NULL);    /*< create some demo tasks via freertos */

@@ -101,7 +101,6 @@ int qmc6309_hw_init(void)
         printf("qmc6309 I2C master initialized successfully.\r\n");
     }
 
-    qmc6309_i2c_scan();
     return ret;
 }
 
@@ -125,5 +124,5 @@ int qmc6309_i2c_read(uint16_t address, uint8_t *p_data, uint16_t size)
 
 void qmc6309_delay_ms(unsigned int ms)
 {
-    vTaskDelay(ms);
+    vTaskDelay(pdMS_TO_TICKS(ms));
 }

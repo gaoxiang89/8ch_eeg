@@ -475,7 +475,7 @@ int qmc6309_init(void)
 	if(p_mag.chip_type != TYPE_UNKNOW)
 	{
 		qmc6309_soft_reset();
-		qmc6309_init_para(QMC6309_MODE_NORMAL, QMC6309_ODR_50HZ);
+		qmc6309_init_para(QMC6309_MODE_NORMAL, QMC6309_ODR_100HZ);
 		ret = qmc6309_disable();
 		QMC6309_CHECK_ERR(ret);
 		ret = qmc6309_enable();

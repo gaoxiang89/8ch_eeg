@@ -16,7 +16,7 @@ static void qmi8658_enableSensors(unsigned char enableFlags);
 static void qmi8658_read_sensor_data(float acc[3], float gyro[3]);
 static void qmi8658_axis_convert(short data_a[3], short data_g[3], int layout);
 
-	static qmi8658_state g_imu;
+static qmi8658_state g_imu;
 
 static int qmi8658_write_reg(unsigned char reg, unsigned char value)
 {
@@ -419,7 +419,6 @@ void qmi8658_read_xyz(float acc[3], float gyro[3])
 	if (data_ready)
 	{
 		qmi8658_read_sensor_data(acc, gyro);
-		qmi8658_log("data ready ok!\r\n");
 		g_imu.imu[0] = acc[0];
 		g_imu.imu[1] = acc[1];
 		g_imu.imu[2] = acc[2];

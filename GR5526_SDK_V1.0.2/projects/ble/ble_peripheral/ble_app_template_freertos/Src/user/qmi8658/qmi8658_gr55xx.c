@@ -106,7 +106,7 @@ int qmi8658_i2c_read(uint16_t address, uint8_t *p_data, uint16_t size)
 
 void qmi8658_delay_ms(unsigned int ms)
 {
-	vTaskDelay(ms);
+	vTaskDelay(pdMS_TO_TICKS(ms));
 }
 
 void qmi8658_delay_us(unsigned int us)
