@@ -6,7 +6,8 @@
 #include "tusb.h"
 
 #include "grx_hal.h"
-#include "board_SK.h"
+#include "board_bc.h"
+#include "eeg_reader.h"
 //--------------------------------------------------------------------+
 // MACRO CONSTANT TYPEDEF PROTYPES
 //--------------------------------------------------------------------+
@@ -44,6 +45,7 @@ int main(void)
 
   tusb_init();
   tusb_bsp_init();
+  eeg_reader_init();
 
   while (1)
   {
@@ -51,6 +53,8 @@ int main(void)
     led_blinking_task();
 
     cdc_task();
+
+    eeg_reader_task(NULL);
   }
 
   return 0;

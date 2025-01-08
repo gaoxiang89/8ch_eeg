@@ -47,6 +47,10 @@ extern "C"
 
     void ads1299_delay_ms(uint32_t ms);
 
+    void ads1299_delay_us(uint32_t us);
+
+    void ads1299_hw_spi_high_speed(void);
+
 #ifdef __cplusplus
 }
 #endif

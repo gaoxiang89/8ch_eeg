@@ -1,4 +1,4 @@
-#include "board_SK.h"
+#include "board_bc.h"
 #include "gr_soc.h"
 #include "grx_hal.h"
 
@@ -22,14 +22,7 @@ void systick_init(void)
 
 void board_led_write(bool state)
 {
-    if(state)
-    {
-        bsp_led_open(BSP_LED_NUM_0);
-    }
-    else
-    {
-        bsp_led_close(BSP_LED_NUM_0);
-    }
+
 }
 
 

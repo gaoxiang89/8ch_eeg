@@ -1,0 +1,333 @@
+#ifndef ADS1299_REGISTERS_H_
+#define ADS1299_REGISTERS_H_
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+typedef enum {
+	// system commands
+	CMD_WAKEUP = 0x02,
+	CMD_STANDBY = 0x04,
+	CMD_RESET = 0x06,
+	CMD_START = 0x08,
+	CMD_STOP = 0x0a,
+
+	// read commands
+	CMD_RDATAC = 0x10,
+	CMD_SDATAC = 0x11,
+	CMD_RDATA = 0x12,
+
+	// register commands
+	CMD_RREG = 0x20,
+	CMD_WREG = 0x40
+} ads1299_cmd_t;
+
+typedef enum {
+	// device settings
+	REG_ID = 0x00,
+
+	// global settings
+	REG_CONFIG1 = 0x01,
+	REG_CONFIG2 = 0x02,
+	REG_CONFIG3 = 0x03,
+	REG_LOFF = 0x04,
+
+	// channel specific settings
+	REG_CHnSET = 0x04,
+	REG_CH1SET = REG_CHnSET + 1,
+	REG_CH2SET = REG_CHnSET + 2,
+	REG_CH3SET = REG_CHnSET + 3,
+	REG_CH4SET = REG_CHnSET + 4,
+	REG_CH5SET = REG_CHnSET + 5,
+	REG_CH6SET = REG_CHnSET + 6,
+	REG_CH7SET = REG_CHnSET + 7,
+	REG_CH8SET = REG_CHnSET + 8,
+	REG_BIAS_SENSP = 0x0d,
+	REG_BIAS_SENSN = 0x0e,
+	REG_LOFF_SENSP = 0x0f,
+	REG_LOFF_SENSN = 0x10,
+	REG_LOFF_FLIP = 0x11,
+
+	// lead off status
+	REG_LOFF_STATP = 0x12,
+	REG_LOFF_STATN = 0x13,
+
+	// other
+	REG_GPIO = 0x14,
+	REG_MISC1 = 0x15,
+	REG_MISC2 = 0x16,
+	REG_CONFIG4 = 0x17,
+	REG_MAX,
+} ads1299_reg_t;
+
+enum ID_bits {
+	DEV_ID7 = 0x80,
+	DEV_ID6 = 0x40,
+	DEV_ID5 = 0x20,
+	DEV_ID2 = 0x04,
+	DEV_ID1 = 0x02,
+	DEV_ID0 = 0x01,
+
+	ID_const = 0x10,
+	ID_ADS129x = DEV_ID7,
+	ID_ADS129xR = (DEV_ID7 | DEV_ID6),
+
+	ID_4CHAN = 0,
+	ID_6CHAN = DEV_ID0,
+	ID_8CHAN = DEV_ID1,
+
+	ID_ADS1194 = 0xb4,
+
+	ID_ADS1299_BASE = 0x3C,
+	ID_ADS1294 = (ID_ADS129x | ID_4CHAN),
+	ID_ADS1296 = (ID_ADS129x | ID_6CHAN),
+	ID_ADS1298 = (ID_ADS129x | ID_8CHAN),
+	ID_ADS1294R = (ID_ADS129xR | ID_4CHAN),
+	ID_ADS1296R = (ID_ADS129xR | ID_6CHAN),
+	ID_ADS1298R = (ID_ADS129xR | ID_8CHAN | 0x10), // 4:3 2h
+
+	ID_ADS1299_4 = (ID_ADS1299_BASE | ID_4CHAN),
+	ID_ADS1299_6 = (ID_ADS1299_BASE | ID_6CHAN),
+	ID_ADS1299 = (ID_ADS1299_BASE | ID_8CHAN)
+};
+
+enum CONFIG1_bits {
+	HR = 0x80,
+	DAISY_EN = 0x40,
+	CLK_EN = 0x20,
+	DR2 = 0x04,
+	DR1 = 0x02,
+	DR0 = 0x01,
+
+	CONFIG1_const = 0x10,
+
+	HIGH_RES_16k_SPS = 0,
+	HIGH_RES_8k_SPS = DR0,
+	HIGH_RES_4k_SPS = DR1,
+	HIGH_RES_2k_SPS = (DR1 | DR0),
+	HIGH_RES_1k_SPS = (DR2),
+	HIGH_RES_500_SPS = (DR2 | DR0),
+	HIGH_RES_250_SPS = (DR2 | DR1),
+};
+
+enum CONFIG2_bits {
+	TEST_SIGNAL_INT = 0x10,
+	TEST_AMP_X2 = 0x04,
+	TEST_FREQ1 = 0x02,
+	TEST_FREQ0 = 0x01,
+
+	CONFIG2_const = 0xC8,
+
+	INT_TEST_4HZ = TEST_SIGNAL_INT,
+	INT_TEST_8HZ = (TEST_SIGNAL_INT | TEST_FREQ0),
+	INT_TEST_NONE = TEST_FREQ1,
+	INT_TEST_DC = (TEST_SIGNAL_INT | TEST_FREQ1 | TEST_FREQ0)
+};
+
+enum CONFIG3_bits {
+	REF_BUF_EN = 0x80, // enable adc reference buffer
+	VREF_4V = 0x20,
+	BIAS_MEAS = 0x10,		  // enable bias measurement
+	BIAS_REF_INTERNAL = 0x08, // internal, (AVDD + AVSS) / 2
+	BIAS_BUF_EN = 0x04,		  // power on bias buffer
+	BIAS_LOFF_SENS = 0x02,	  // enable BIAS lead off sense
+	BIAS_STAT = 0x01,
+
+	CONFIG3_const = 0x20
+};
+
+enum LOFF_bits {
+	COMP_TH2 = 0x80,
+	COMP_TH1 = 0x40,
+	COMP_TH0 = 0x20,
+	VLEAD_OFF_EN = 0x10,
+	ILEAD_OFF1 = 0x08,
+	ILEAD_OFF0 = 0x04,
+	FLEAD_OFF1 = 0x02,
+	FLEAD_OFF0 = 0x01,
+
+	LOFF_const = 0x00,
+
+	COMP_TH_95 = 0x00,
+	COMP_TH_92_5 = COMP_TH0,
+	COMP_TH_90 = COMP_TH1,
+	COMP_TH_87_5 = (COMP_TH1 | COMP_TH0),
+	COMP_TH_85 = COMP_TH2,
+	COMP_TH_80 = (COMP_TH2 | COMP_TH0),
+	COMP_TH_75 = (COMP_TH2 | COMP_TH1),
+	COMP_TH_70 = (COMP_TH2 | COMP_TH1 | COMP_TH0),
+
+	ILEAD_OFF_6nA = 0x00,
+	ILEAD_OFF_12nA = ILEAD_OFF0,
+	ILEAD_OFF_18nA = ILEAD_OFF1,
+	ILEAD_OFF_24nA = (ILEAD_OFF1 | ILEAD_OFF0),
+
+	FLEAD_OFF_MASK = (FLEAD_OFF0 | FLEAD_OFF1),
+	FLEAD_OFF_DC = 0x00,
+	FLEAD_OFF_AC_7P8Hz = FLEAD_OFF0,
+	FLEAD_OFF_AC_31P2Hz = FLEAD_OFF1,
+	FLEAD_OFF_AC_Fdr4Hz = (FLEAD_OFF0 | FLEAD_OFF1),
+};
+
+enum CHnSET_bits {
+	PDn = 0x80,
+	GAINn2 = 0x40,
+	GAINn1 = 0x20,
+	GAINn0 = 0x10,
+	MUXn2 = 0x04,
+	MUXn1 = 0x02,
+	MUXn0 = 0x01,
+
+	CHnSET_const = 0x00,
+
+	GAIN_6X = 0x00,
+	GAIN_1X = GAINn0,
+	GAIN_2X = GAINn1,
+	GAIN_3X = (GAINn1 | GAINn0),
+	GAIN_4X = GAINn2,
+	GAIN_8X = (GAINn2 | GAINn0),
+	GAIN_12X = (GAINn2 | GAINn1),
+	GAIN_24X = (GAINn2 | GAINn1 | GAINn0),
+
+	SRB2 = 0x80,
+
+	MUX_MASK = (MUXn2 | MUXn1 | MUXn0),
+	ELECTRODE_INPUT = 0x00,
+	SHORTED = MUXn0,
+	BIAS_INPUT = MUXn1,
+	MVDD = (MUXn1 | MUXn0),
+	TEMP = MUXn2,
+	TEST_SIGNAL = (MUXn2 | MUXn0),
+	BIAS_DRP = (MUXn2 | MUXn1),
+	BIAS_DRN = (MUXn2 | MUXn1 | MUXn0)
+};
+
+enum BIAS_SENSP_bits {
+	BIAS8P = 0x80,
+	BIAS7P = 0x40,
+	BIAS6P = 0x20,
+	BIAS5P = 0x10,
+	BIAS4P = 0x08,
+	BIAS3P = 0x04,
+	BIAS2P = 0x02,
+	BIAS1P = 0x01,
+
+	BIAS_SENSP_const = 0x00,
+	BIAS_SENSP_ALL = (BIAS8P | BIAS7P | BIAS6P | BIAS5P | BIAS4P | BIAS3P | BIAS2P | BIAS1P),
+};
+
+enum BIAS_SENSN_bits {
+	BIAS8N = 0x80,
+	BIAS7N = 0x40,
+	BIAS6N = 0x20,
+	BIAS5N = 0x10,
+	BIAS4N = 0x08,
+	BIAS3N = 0x04,
+	BIAS2N = 0x02,
+	BIAS1N = 0x01,
+
+	BIAS_SENSN_const = 0x00,
+	BIAS_SENSN_ALL = (BIAS8N | BIAS7N | BIAS6N | BIAS5N | BIAS4N | BIAS3N | BIAS2N | BIAS1N),
+};
+
+enum LOFF_SENSP_bits {
+	LOFF8P = 0x80,
+	LOFF7P = 0x40,
+	LOFF6P = 0x20,
+	LOFF5P = 0x10,
+	LOFF4P = 0x08,
+	LOFF3P = 0x04,
+	LOFF2P = 0x02,
+	LOFF1P = 0x01,
+
+	LOFF_SENSP_const = 0x00,
+	LOFF_SENSP_ALL = (LOFF8P | LOFF7P | LOFF6P | LOFF5P | LOFF4P | LOFF3P | LOFF2P | LOFF1P),
+};
+
+enum LOFF_SENSN_bits {
+	LOFF8N = 0x80,
+	LOFF7N = 0x40,
+	LOFF6N = 0x20,
+	LOFF5N = 0x10,
+	LOFF4N = 0x08,
+	LOFF3N = 0x04,
+	LOFF2N = 0x02,
+	LOFF1N = 0x01,
+
+	LOFF_SENSN_const = 0x00,
+	LOFF_SENSN_ALL = (LOFF8N | LOFF7N | LOFF6N | LOFF5N | LOFF4N | LOFF3N | LOFF2N | LOFF1N),
+};
+
+enum LOFF_FLIP_bits {
+	LOFF_FLIP8 = 0x80,
+	LOFF_FLIP7 = 0x40,
+	LOFF_FLIP6 = 0x20,
+	LOFF_FLIP5 = 0x10,
+	LOFF_FLIP4 = 0x08,
+	LOFF_FLIP3 = 0x04,
+	LOFF_FLIP2 = 0x02,
+	LOFF_FLIP1 = 0x01,
+
+	LOFF_FLIP_const = 0x00,
+};
+
+enum LOFF_STATP_bits {
+	IN8P_OFF = 0x80,
+	IN7P_OFF = 0x40,
+	IN6P_OFF = 0x20,
+	IN5P_OFF = 0x10,
+	IN4P_OFF = 0x08,
+	IN3P_OFF = 0x04,
+	IN2P_OFF = 0x02,
+	IN1P_OFF = 0x01,
+
+	LOFF_STATP_const = 0x00
+};
+
+enum LOFF_STATN_bits {
+	IN8N_OFF = 0x80,
+	IN7N_OFF = 0x40,
+	IN6N_OFF = 0x20,
+	IN5N_OFF = 0x10,
+	IN4N_OFF = 0x08,
+	IN3N_OFF = 0x04,
+	IN2N_OFF = 0x02,
+	IN1N_OFF = 0x01,
+
+	LOFF_STATN_const = 0x00
+};
+
+enum GPIO_bits {
+	GPIOD4 = 0x80,
+	GPIOD3 = 0x40,
+	GPIOD2 = 0x20,
+	GPIOD1 = 0x10,
+	GPIOC4 = 0x08,
+	GPIOC3 = 0x04,
+	GPIOC2 = 0x02,
+	GPIOC1 = 0x01,
+
+	GPIO_const = 0x00
+};
+
+enum MISC1_bits {
+	SRB1 = 0x20,
+
+	MISC1_const = 0x00,
+};
+
+enum MISC2_bits {
+	MISC2_const = 0x00,
+};
+
+enum CONFIG4_bits {
+	SINGLE_SHOT = 0x08,
+	PD_LOFF_COMP = 0x02,
+
+	CONFIG4_const = 0x01,
+};
+
+#ifdef __cplusplus
+}
+#endif
+#endif /* ADS1299_REGISTERS_H_ */

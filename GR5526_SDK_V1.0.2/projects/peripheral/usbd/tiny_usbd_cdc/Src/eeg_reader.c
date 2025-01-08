@@ -1,19 +1,12 @@
 #include "ads1299/ads1299.h"
-#include "FreeRTOS.h"
-#include "task.h"
-#include "semphr.h"
+
 #include "app_log.h"
 #include <app_io.h>
 #include "board_bc.h"
 
 static uint8_t rd_eeg_buf[ADS1299_READ_SAMPLE_BYTES];
-static SemaphoreHandle_t eeg_drdy_sem;
 #define EEG_READ_DEBUG 1
 #define EEG_READ_IN_ISR 0
-
-#if (EEG_READ_IN_ISR)
-static QueueHandle_t xEEGQueue;
-#endif
 
 void eeg_read_debug_pin_init(void)
 {
@@ -42,72 +35,49 @@ void eeg_read_debug_pin_set(int value)
 }
 
 volatile bool start_read_in_isr = false;
+volatile bool eeg_drdy = false;
 void eeg_drdy_cb(void)
 {
-    BaseType_t ret = pdTRUE;
-    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
 #if (EEG_READ_IN_ISR)
-    if (!start_read_in_isr) {
+    if (!start_read_in_isr)
+    {
         return;
     }
     eeg_read_debug_pin_set(APP_IO_PIN_SET);
     ads1299_read_samples_data(rd_eeg_buf, ADS1299_READ_SAMPLE_BYTES);
     eeg_read_debug_pin_set(APP_IO_PIN_RESET);
 
-    xQueueSendFromISR(xEEGQueue, &rd_eeg_buf, &xHigherPriorityTaskWoken);
-	portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
-	return;
+    return;
 #else
-    if (eeg_drdy_sem)
-    {
-        ret = xSemaphoreGiveFromISR(eeg_drdy_sem, &xHigherPriorityTaskWoken);
-        if (xHigherPriorityTaskWoken != pdFALSE)
-        {
-            portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
-        }
-    }
+    eeg_drdy = true;
 #endif
 }
 
 void eeg_reader_task(void *arg)
 {
-    int count = 0;
+    static uint32_t count = 0;
     uint8_t eeg_buf[ADS1299_READ_SAMPLE_BYTES];
 
-#if (EEG_READ_IN_ISR)
-	xEEGQueue = xQueueCreate(20, ADS1299_READ_SAMPLE_BYTES);
-#endif
-    ads1299_init();
-    ads1299_drdy_cb_register(eeg_drdy_cb);
-    ads1299_read_samples_data(rd_eeg_buf, ADS1299_READ_SAMPLE_BYTES);
-    eeg_read_debug_pin_init();
-    start_read_in_isr = true;
-    APP_LOG_INFO("eeg reader init\r\n");
-    while (1)
+    if (eeg_drdy)
     {
-#if (EEG_READ_IN_ISR)
-		if (pdTRUE != xQueueReceive(xEEGQueue, &eeg_buf, pdMS_TO_TICKS(100))) {
-			ads1299_read_samples_data(eeg_buf, ADS1299_READ_SAMPLE_BYTES);
-		}
-#else
-        xSemaphoreTake(eeg_drdy_sem, pdMS_TO_TICKS(5000));
         eeg_read_debug_pin_set(APP_IO_PIN_SET);
         ads1299_read_samples_data(rd_eeg_buf, ADS1299_READ_SAMPLE_BYTES);
         eeg_read_debug_pin_set(APP_IO_PIN_RESET);
-#endif
-        if (count++ >= 250)
+        eeg_drdy = false;
+    } else {
+        if (count++ > 100000)
         {
-            // APP_LOG_INFO("eeg reader, count: %d\r\n", count);
             count = 0;
+            ads1299_read_samples_data(rd_eeg_buf, ADS1299_READ_SAMPLE_BYTES);
         }
     }
-
-    vTaskDelete(NULL);
 }
 
 void eeg_reader_init(void)
 {
-    xTaskCreate(eeg_reader_task, "eeg_reader_task", 1024, NULL, 5, NULL);
-    eeg_drdy_sem = xSemaphoreCreateBinary();
+    ads1299_init();
+    ads1299_drdy_cb_register(eeg_drdy_cb);
+    ads1299_read_samples_data(rd_eeg_buf, ADS1299_READ_SAMPLE_BYTES);
+    eeg_read_debug_pin_init();
 }

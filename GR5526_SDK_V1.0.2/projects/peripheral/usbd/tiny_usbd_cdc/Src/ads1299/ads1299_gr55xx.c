@@ -1,13 +1,11 @@
 #include "ads1299.h"
 #include "board_bc.h"
 
-#include "FreeRTOS.h"
-#include "task.h"
 #include "app_log.h"
 #include "app_spi.h"
 #include "app_spi_dma.h"
 
-#define SPI_CLOCK_PRESCALER 20u     /* The SPI CLOCK Freq = Peripheral CLK/SPI_CLOCK_PRESCALER */
+#define SPI_CLOCK_PRESCALER 32u     /* The SPI CLOCK Freq = Peripheral CLK/SPI_CLOCK_PRESCALER */
 #define SPI_SOFT_CS_MODE_ENABLE 1u  /* suggest to enable SOFT CS MODE */
 #define SPI_SOFT_CS_MODE_DISABLE 0u /* suggest to enable SOFT CS MODE */
 #define SPI_WAIT_TIMEOUT_MS 1500u   /* default time(ms) for wait operation */
@@ -15,7 +13,7 @@
 #if SPI_CLOCK_PRESCALER == 2u
 #define RX_SAMPLE_DELAY 1u
 #else
-#define RX_SAMPLE_DELAY 2u
+#define RX_SAMPLE_DELAY 0u
 #endif
 
 /* master spi parameters */
@@ -182,6 +180,13 @@ void ads1299_hw_init(void)
     APP_LOG_DEBUG("SPI master inital success!\r\n");
 }
 
+void ads1299_hw_spi_high_speed(void)
+{
+    app_spi_deinit(APP_SPI_ID_MASTER);
+    spi_params.init.baudrate_prescaler = 8;
+    app_spi_init(&spi_params, app_spi_master_callback);
+}
+
 void ads1299_hw_reset_pin_set(int value)
 {
 #ifdef AFE_RESET_PIN
@@ -218,17 +223,23 @@ int eeg_afe_hw_spi_dma_receive(uint8_t *p_tx_data, uint8_t *p_rx_data, uint32_t 
 	app_drv_err_t ret = 0;
 
 	app_spi_dma_transmit_receive_async(APP_SPI_ID_MASTER, p_tx_data, p_rx_data, size);
-	while (g_master_tdone == 0)
-	{
-        vTaskDelay(1);
-	}
+
+	// while (g_master_trdone == 0)
+	// {
+    //     // delay_ms(1);
+	// }
 
 	return ret;
 }
 
 void ads1299_delay_ms(uint32_t ms)
 {
-    vTaskDelay(pdMS_TO_TICKS(ms));
+    delay_ms(ms);;
+}
+
+void ads1299_delay_us(uint32_t us)
+{
+    delay_us(us);;
 }
 
 void ads1299_drdy_cb_register(ads1299_drdy_cb_t cb)

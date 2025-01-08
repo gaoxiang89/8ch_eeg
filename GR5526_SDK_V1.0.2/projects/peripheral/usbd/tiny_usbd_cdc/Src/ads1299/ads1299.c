@@ -50,6 +50,7 @@ static int ads1299_write_reg(uint8_t reg, uint8_t rval)
 	uint8_t read_buf[3] = {0, 0, 0};
 
 	ret = ads1299_hw_spi_transmit_receive(write_buf, read_buf, 3);
+	ads1299_delay_us(100);
 	if (ret != 0)
 	{
 		APP_LOG_INFO("afe read reg failed, %d\r\n", ret);
@@ -62,7 +63,7 @@ static int ads1299_write_reg(uint8_t reg, uint8_t rval)
 static int ads1299_read_reg(uint8_t reg, uint8_t *rval)
 {
 	int ret = 0;
-	uint8_t write_buf[3] = {CMD_RREG | reg, 0x0};
+	uint8_t write_buf[3] = {CMD_RREG | reg, 0x0, 0x0};
 	uint8_t read_buf[3] = {0, 0, 0};
 
 	ret = ads1299_hw_spi_transmit_receive(write_buf, read_buf, 3);
@@ -93,6 +94,11 @@ static void ads1299_device_reset(void)
 
 void default_reg_set(void)
 {
+	ads1299_write_cmd(CMD_STOP);
+	ads1299_delay_ms(1);
+	ads1299_write_cmd(CMD_SDATAC);
+	ads1299_delay_ms(1);
+
 	ads1299_write_reg(REG_CONFIG1, CONFIG1_const | HIGH_RES_4k_SPS);
 	ads1299_write_reg(REG_CONFIG3, CONFIG3_const | REF_BUF_EN | BIAS_REF_INTERNAL | BIAS_BUF_EN | INT_TEST_NONE);
 	ads1299_write_reg(REG_LOFF, LOFF_const | COMP_TH_90 | ILEAD_OFF_6nA | FLEAD_OFF_DC);
@@ -137,8 +143,6 @@ static void ads1299_all_reg_read(void)
 {
 	uint8_t reg;
 
-	ads1299_write_cmd(CMD_SDATAC);
-
 	for (int i = 1; i < REG_MAX; i++)
 	{
 		ads1299_read_reg(i, &reg);
@@ -169,12 +173,20 @@ int ads1299_init(void)
 	ads1299_all_reg_read();
 	ads1299_delay_ms(10);
 	default_reg_set();
+	ads1299_delay_ms(10);
 	ads1299_all_reg_read();
+ads1299_delay_ms(1);
+	ads1299_hw_spi_high_speed();
+
 	ads1299_write_cmd(CMD_START);
+	
 	ads1299_delay_ms(1);
 	ads1299_write_cmd(CMD_START);
 	ads1299_delay_ms(1);
 	ads1299_write_cmd(CMD_RDATAC);
+
+    
+
 	return 0;
 }
 
@@ -185,9 +197,8 @@ int ads1299_read_samples_data(uint8_t *data, uint8_t len)
 {
 	int ret = 0;
 
-	// ret = eeg_afe_hw_spi_dma_receive(data, len);
-	// ret = eeg_afe_hw_spi_dma_receive(spi_tx_dumy, data, len);
-	ret = ads1299_hw_spi_transmit_receive(spi_tx_dumy, data, len);
+	ret = eeg_afe_hw_spi_dma_receive(spi_tx_dumy, data, len);
+	// ret = ads1299_hw_spi_transmit_receive(spi_tx_dumy, data, len);
 	if (ret != 0)
 	{
 		APP_LOG_INFO("afe read reg failed, %d\r\n", ret);

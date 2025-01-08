@@ -25,7 +25,7 @@ void imu_reader_task(void *arg)
     xSemaphore = xSemaphoreCreateBinary();
 
     // Create the timer.
-    TimerHandle_t xTimer = xTimerCreate("ReadTimer", pdMS_TO_TICKS(20), pdTRUE, 0, vTimerCallback);
+    TimerHandle_t xTimer = xTimerCreate("ReadTimer", pdMS_TO_TICKS(1000), pdTRUE, 0, vTimerCallback);
 
     // Start the timer.
     xTimerStart(xTimer, 0);
@@ -49,7 +49,7 @@ void imu_reader_task(void *arg)
             // Calculate the time difference in ms
             TickType_t xTimeDifference = (xCurrentReadTime - xLastReadTime);
 
-            APP_LOG_INFO("Time difference between two readings: %d ms\n", xTimeDifference);
+            // APP_LOG_INFO("Time difference between two readings: %d ms\n", xTimeDifference);
 
             // Update the last read time
             xLastReadTime = xCurrentReadTime;
