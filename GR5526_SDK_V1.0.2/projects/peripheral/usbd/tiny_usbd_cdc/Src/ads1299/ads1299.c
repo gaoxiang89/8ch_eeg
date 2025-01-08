@@ -99,7 +99,7 @@ void default_reg_set(void)
 	ads1299_write_cmd(CMD_SDATAC);
 	ads1299_delay_ms(1);
 
-	ads1299_write_reg(REG_CONFIG1, CONFIG1_const | HIGH_RES_4k_SPS);
+	ads1299_write_reg(REG_CONFIG1, CONFIG1_const | HIGH_RES_16k_SPS);
 	ads1299_write_reg(REG_CONFIG3, CONFIG3_const | REF_BUF_EN | BIAS_REF_INTERNAL | BIAS_BUF_EN | INT_TEST_NONE);
 	ads1299_write_reg(REG_LOFF, LOFF_const | COMP_TH_90 | ILEAD_OFF_6nA | FLEAD_OFF_DC);
 
@@ -197,8 +197,8 @@ int ads1299_read_samples_data(uint8_t *data, uint8_t len)
 {
 	int ret = 0;
 
-	ret = eeg_afe_hw_spi_dma_receive(spi_tx_dumy, data, len);
-	// ret = ads1299_hw_spi_transmit_receive(spi_tx_dumy, data, len);
+	// ret = eeg_afe_hw_spi_dma_receive(spi_tx_dumy, data, len);
+	ret = ads1299_hw_spi_transmit_receive(spi_tx_dumy, data, len);
 	if (ret != 0)
 	{
 		APP_LOG_INFO("afe read reg failed, %d\r\n", ret);
